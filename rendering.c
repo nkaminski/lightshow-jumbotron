@@ -1,12 +1,15 @@
 #include <stdlib.h>
+#include <time.h>
 #include "globals.h"
 #include "rendering.h"
 
 static TTF_Font *f_full, *f_half;
+//TESTING ONLY
+const time_t t_end = 1481614841;
 
 /* initializes font rendering */
 int font_open(TTF_Font **fp, char* fontpath, int size_divisor){
-    *fp = TTF_OpenFont(fontpath, (win_w/CHARS_PER_LINE)/size_divisor);
+    *fp = TTF_OpenFont(fontpath, (win_w/TEXT_SIZE_DIVISOR)/size_divisor);
     if (*fp == NULL) {
         fprintf(stderr, "error: font not found\n");
         return -1;
@@ -17,7 +20,7 @@ int font_open(TTF_Font **fp, char* fontpath, int size_divisor){
  * - x, y: bottom center point.
  *   - texture, rect: outputs.
  *    Must free texture when done!*/
-int get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
+int get_text_and_rect(SDL_Renderer *renderer, int x, int y, int refloc, char *text,
         TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect, SDL_Color color) {
     int text_width;
     int text_height;
@@ -35,7 +38,18 @@ int get_text_and_rect(SDL_Renderer *renderer, int x, int y, char *text,
     text_height = surface->h;
     SDL_FreeSurface(surface);
     rect->x = x-(text_width/2);
-    rect->y = y-text_height;
+    if(refloc == 1){
+        //top
+        rect->y = y;
+    } 
+    else if(refloc == 0){
+        //center
+        rect->y = y-(text_height/2);
+    }
+    else{
+        //bottom
+        rect->y = y-text_height;
+    }
     rect->w = text_width;
     rect->h = text_height;
     return 0;
@@ -55,17 +69,79 @@ int RenderingDestroy(){
         TTF_CloseFont(f_half);
     return 0;
 }
-int RenderSlide(SDL_Renderer *r, int slidenum, unsigned char final){
-    static SDL_Texture *texture1=NULL;
-    static SDL_Rect rect1;
+int RenderSlide(SDL_Renderer *r, int *slidenum, unsigned char final){
+    static SDL_Texture *texture_l1=NULL, *texture_l2=NULL;
+    static SDL_Rect rect_l1, rect_l2;
     SDL_Color white = {255,255,255,0};
-    
-    if(get_text_and_rect(r, win_w/2, win_h, "HELLO WORLD!!", f_full, &texture1, &rect1, white) < 0)
-        return -1;
-    SDL_RenderCopy(r, texture1, NULL, &rect1);
-    SDL_DestroyTexture(texture1);
+    SDL_Color red = {255,58,58,0};
+    SDL_Color green = {58,255,50,0};
+    char timebuf[256];
+    char advance=1;
+    time_t t_current = time(NULL);
+    time_t t_delta = t_end - t_current;
+    /* SLIDE SPECIFIC RENDERING CODE HERE */
+    while(advance){
+        advance=0;
+        switch(*slidenum){
+            case 0:
+                /* timer slide */
+                if(t_current >= t_end){
+                    //skip slide
+                    (*slidenum)++;
+                    advance=1;
+                    break;
+                }
+                snprintf(timebuf, 256, "%02ld:%02ld", t_delta/60, t_delta % 60);
+                if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Next Show:", f_half, &texture_l1, &rect_l1, white) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
+                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, timebuf, f_full, &texture_l2, &rect_l2, white) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
+                SDL_DestroyTexture(texture_l1);
+                texture_l1=NULL;
+                SDL_DestroyTexture(texture_l2);
+                texture_l2=NULL;
+
+                break;
+            case 1:
+                if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Tune Radio To:", f_half, &texture_l1, &rect_l1, white) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
+                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, "88.9 FM", f_full, &texture_l2, &rect_l2, white) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
+                SDL_DestroyTexture(texture_l1);
+                texture_l1=NULL;
+                SDL_DestroyTexture(texture_l2);
+                texture_l2=NULL;
+
+                break;
+            case 2:
+                if(get_text_and_rect(r, win_w/2, win_h/3, 1, "Happy", f_half, &texture_l1, &rect_l1, red) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
+                if(get_text_and_rect(r, win_w/2, (win_h/3)+TTF_FontLineSkip(f_half), 1, "Holidays!", f_half, &texture_l2, &rect_l2, green) < 0)
+                    return -1;
+                SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
+                SDL_DestroyTexture(texture_l1);
+                texture_l1=NULL;
+                SDL_DestroyTexture(texture_l2);
+                texture_l2=NULL;
+                break;
+
+            default:
+                *slidenum = 0;
+                advance=1;
+                break;
+        }
+    }
     /* called to render the final slide, deallocate everything at the end */
     if(final){
+        if(texture_l1 != NULL)
+            SDL_DestroyTexture(texture_l1);
+        if(texture_l2 != NULL)
+            SDL_DestroyTexture(texture_l2);
     }
     return 0;
 }
