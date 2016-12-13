@@ -6,13 +6,10 @@ int win_w, win_h;
 
 int main(int argc, char **argv) {
     SDL_Event event;
-    SDL_Rect rect1, rect2;
     SDL_Renderer *renderer;
-    SDL_Texture *texture1, *texture2;
     SDL_Window *window;
     char *font_path;
-    TTF_Font *font;
-    int quit;
+    unsigned char quit;
 
     if (argc == 1) {
         font_path = "FreeSans.ttf";
@@ -22,7 +19,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "error: too many arguments\n");
         exit(EXIT_FAILURE);
     }
-
+    TTF_Init();
     /* Init window */
     if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
@@ -34,13 +31,14 @@ int main(int argc, char **argv) {
         return 3;
     }
     if(SDL_GetRendererOutputSize(renderer, &win_w, &win_h) < 0){
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open SDL window: %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get SDL window size: %s", SDL_GetError());
         return 3;
     }
-    if (font_init(&font,font_path) < 0) {
-        exit(EXIT_FAILURE);
+    if(RenderingPrepare(&renderer, font_path) < 0){
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during final renderer initialization");
+        return 3;
     }
-    get_text_and_rect(renderer, win_w/2, win_h, "HELLO WORLD!!", font, &texture1, &rect1);
+
    // get_text_and_rect(renderer, 0, rect1.y + rect1.h, "world", font, &texture2, &rect2);
 
     quit = 0;
@@ -52,19 +50,13 @@ int main(int argc, char **argv) {
         }
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         SDL_RenderClear(renderer);
-
-        /* Use TTF textures. */
-        SDL_RenderCopy(renderer, texture1, NULL, &rect1);
-        //SDL_RenderCopy(renderer, texture2, NULL, &rect2);
+        RenderSlide(renderer, 0, quit);
 
         SDL_RenderPresent(renderer);
     }
-
-    /* Deinit TTF. */
-    SDL_DestroyTexture(texture1);
-    //SDL_DestroyTexture(texture2);
-    font_destroy();
-
+    /* cleanup and destroy objects */
+    RenderingDestroy();
+    TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

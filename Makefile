@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g
+CFLAGS = -Wall -O2 -g
 LIBS = -lSDL2 -lSDL2_ttf
 EXENAME = jumbotron
 all:	
