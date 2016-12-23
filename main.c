@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
         RenderSlide(renderer, &curslide, quit);
 
         SDL_RenderPresent(renderer);
+	usleep(1E5);
     }
     /* cleanup and destroy objects */
     RenderingDestroy();

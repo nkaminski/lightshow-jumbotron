@@ -108,7 +108,7 @@ int RenderSlide(SDL_Renderer *r, int *slidenum, unsigned char final){
                 if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Tune Radio To:", f_half, &texture_l1, &rect_l1, white) < 0)
                     return -1;
                 SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
-                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, "88.9 FM", f_full, &texture_l2, &rect_l2, white) < 0)
+                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, "89.9 FM", f_full, &texture_l2, &rect_l2, white) < 0)
                     return -1;
                 SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
                 SDL_DestroyTexture(texture_l1);
