@@ -4,8 +4,6 @@
 #include "rendering.h"
 
 static TTF_Font *f_full, *f_half;
-//TESTING ONLY
-const time_t t_end = 1481614841;
 
 /* initializes font rendering */
 int font_open(TTF_Font **fp, char* fontpath, int size_divisor){

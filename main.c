@@ -1,8 +1,11 @@
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
 #include "globals.h"
 #include "rendering.h"
 int win_w, win_h;
+time_t t_end;
 unsigned int slide_delay = SLIDEDELAY_MS;
 
 unsigned int s_timer_callback(unsigned int interval, void *param)
@@ -29,7 +32,9 @@ int main(int argc, char **argv) {
     SDL_Renderer *renderer;
     SDL_Window *window;
     SDL_TimerID timerid;
+    FILE *fileptr;
     char *font_path;
+    char timestr[32];
     unsigned char quit;
     int curslide=0;
 
@@ -68,7 +73,19 @@ int main(int argc, char **argv) {
         while (SDL_PollEvent(&event) == 1) {
             if (event.type == SDL_QUIT) {
                 quit = 1;
-            } else if(event.type == SDL_USEREVENT && event.user.code == EVT_SLIDECHANGE){
+            } else if(event.type == SDL_USEREVENT && event.user.code == EVT_SLIDECHANGE){	
+
+		    /* opening file for reading end time*/
+		    fileptr = fopen("/tmp/nextshow" , "r");
+		    if(fileptr != NULL){
+		    	if( fgets (timestr, 32, fileptr)!=NULL ) 
+		    	{
+			    t_end = atoi(timestr);
+		    	}
+		    	fclose(fileptr);
+	    	    } else {
+			t_end = 0;
+		   }
                 curslide++;
                 if(curslide >= NUM_SLIDES)
                     curslide=0;

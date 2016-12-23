@@ -6,3 +6,4 @@
 
 #define EVT_SLIDECHANGE 0
 extern int win_w, win_h, win_lheight;
+extern time_t t_end;
