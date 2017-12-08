@@ -67,74 +67,39 @@ int RenderingDestroy(){
         TTF_CloseFont(f_half);
     return 0;
 }
-int RenderSlide(SDL_Renderer *r, int *slidenum, unsigned char final){
+int RenderSlide(SDL_Renderer *r, int slidenum, SDL_Texture **slides, unsigned char final){
     static SDL_Texture *texture_l1=NULL, *texture_l2=NULL;
     static SDL_Rect rect_l1, rect_l2;
     SDL_Color white = {255,255,255,0};
-    SDL_Color red = {255,58,58,0};
-    SDL_Color green = {58,255,50,0};
+//    SDL_Color red = {255,58,58,0};
+//    SDL_Color green = {58,255,50,0};
     char timebuf[256];
-    char advance=1;
-    time_t t_current = time(NULL);
-    time_t t_delta = t_end - t_current;
+    time_t t_delta = t_end - time(NULL);
     /* SLIDE SPECIFIC RENDERING CODE HERE */
-    while(advance){
-        advance=0;
-        switch(*slidenum){
-            case 0:
+    if(slidenum == 0){
                 /* timer slide */
-                if(t_current >= t_end){
-                    //skip slide
-                    (*slidenum)++;
-                    advance=1;
-                    break;
+                if(t_delta < 0)
+                    t_delta=0;
+                
+                // Does the first line need rendering?
+                if(!texture_l1){
+                    if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Next Show:", f_half, &texture_l1, &rect_l1, white) < 0)
+                        return -1;
                 }
+                
+                //Render the 2nd line
                 snprintf(timebuf, 256, "%02ld:%02ld", t_delta/60, t_delta % 60);
-                if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Next Show:", f_half, &texture_l1, &rect_l1, white) < 0)
-                    return -1;
                 SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
                 if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, timebuf, f_full, &texture_l2, &rect_l2, white) < 0)
                     return -1;
                 SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
-                SDL_DestroyTexture(texture_l1);
-                texture_l1=NULL;
                 SDL_DestroyTexture(texture_l2);
                 texture_l2=NULL;
-
-                break;
-            case 1:
-                if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Tune Radio To:", f_half, &texture_l1, &rect_l1, white) < 0)
-                    return -1;
-                SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
-                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, "89.9 FM", f_full, &texture_l2, &rect_l2, white) < 0)
-                    return -1;
-                SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
-                SDL_DestroyTexture(texture_l1);
-                texture_l1=NULL;
-                SDL_DestroyTexture(texture_l2);
-                texture_l2=NULL;
-
-                break;
-            case 2:
-                if(get_text_and_rect(r, win_w/2, win_h/3, 1, "Happy", f_half, &texture_l1, &rect_l1, red) < 0)
-                    return -1;
-                SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
-                if(get_text_and_rect(r, win_w/2, (win_h/3)+TTF_FontLineSkip(f_half), 1, "Holidays!", f_half, &texture_l2, &rect_l2, green) < 0)
-                    return -1;
-                SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
-                SDL_DestroyTexture(texture_l1);
-                texture_l1=NULL;
-                SDL_DestroyTexture(texture_l2);
-                texture_l2=NULL;
-                break;
-
-            default:
-                *slidenum = 0;
-                advance=1;
-                break;
-        }
+    } else {
+        //Render an image slide
+        SDL_RenderCopy(r, slides[slidenum-1], NULL, NULL); 
     }
-    /* called to render the final slide, deallocate everything at the end */
+    /* called to render the final iteration, deallocate everything at the end */
     if(final){
         if(texture_l1 != NULL)
             SDL_DestroyTexture(texture_l1);
