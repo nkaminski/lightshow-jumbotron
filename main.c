@@ -79,9 +79,10 @@ int main(int argc, char **argv) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error during final renderer initialization");
         return 3;
     }
+
     /* Start cycling through slides */
     timerid = SDL_AddTimer(slide_delay, s_timer_callback, (void *)NULL);
-
+    t_end = read_start_time();
     quit = 0;
     while (!quit) {
         while (SDL_PollEvent(&event) == 1) {

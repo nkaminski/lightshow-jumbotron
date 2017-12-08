@@ -70,9 +70,9 @@ int RenderingDestroy(){
 int RenderSlide(SDL_Renderer *r, int slidenum, SDL_Texture **slides, unsigned char final){
     static SDL_Texture *texture_l1=NULL, *texture_l2=NULL;
     static SDL_Rect rect_l1, rect_l2;
-    SDL_Color white = {255,255,255,0};
-//    SDL_Color red = {255,58,58,0};
-//    SDL_Color green = {58,255,50,0};
+//    SDL_Color white = {255,255,255,0};
+    SDL_Color red = {255,58,58,0};
+    SDL_Color green = {58,255,50,0};
     char timebuf[256];
     time_t t_delta = t_end - time(NULL);
     /* SLIDE SPECIFIC RENDERING CODE HERE */
@@ -83,14 +83,14 @@ int RenderSlide(SDL_Renderer *r, int slidenum, SDL_Texture **slides, unsigned ch
                 
                 // Does the first line need rendering?
                 if(!texture_l1){
-                    if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Next Show:", f_half, &texture_l1, &rect_l1, white) < 0)
+                    if(get_text_and_rect(r, win_w/2, win_h/6, 1, "Next Show:", f_half, &texture_l1, &rect_l1, red) < 0)
                         return -1;
                 }
                 
                 //Render the 2nd line
-                snprintf(timebuf, 256, "%02ld:%02ld", t_delta/60, t_delta % 60);
+                snprintf(timebuf, 256, "%2ld:%02ld", t_delta/60, t_delta % 60);
                 SDL_RenderCopy(r, texture_l1, NULL, &rect_l1);
-                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, timebuf, f_full, &texture_l2, &rect_l2, white) < 0)
+                if(get_text_and_rect(r, win_w/2, (win_h/6)+TTF_FontLineSkip(f_half), 1, timebuf, f_full, &texture_l2, &rect_l2, green) < 0)
                     return -1;
                 SDL_RenderCopy(r, texture_l2, NULL, &rect_l2);
                 SDL_DestroyTexture(texture_l2);
