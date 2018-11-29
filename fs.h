@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 int read_start_time(void);
 int load_images(SDL_Renderer*, SDL_Texture **, const char *);
